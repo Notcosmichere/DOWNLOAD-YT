@@ -1,81 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YT Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-black text-white p-6">
-    <div class="max-w-md mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800">
-        <h2 class="text-2xl font-bold text-red-500 mb-4">YT Downloader</h2>
+<body class="bg-slate-900 text-white p-5">
+    <div class="max-w-md mx-auto mt-10 p-6 bg-slate-800 rounded-lg shadow-xl">
+        <h1 class="text-2xl font-bold mb-4 text-red-500">Video Downloader</h1>
         
-        <input type="text" id="videoUrl" placeholder="Paste link here..." 
-            class="w-full p-3 rounded bg-gray-800 mb-4 border border-gray-700 text-white">
+        <input type="text" id="urlInput" placeholder="Paste YouTube link..." 
+            class="w-full p-3 rounded bg-slate-700 mb-4 outline-none border border-slate-600 focus:border-red-500">
         
-        <button onclick="downloadVideo()" id="btn" 
-            class="w-full bg-red-600 p-4 rounded font-bold active:bg-red-800">
-            START DOWNLOAD
-        </button>
-
-        <div id="statusBox" class="mt-4 p-3 bg-gray-800 rounded text-sm hidden">
-            <p id="statusText" class="text-gray-300">Initializing...</p>
-        </div>
-
+        <button onclick="runMagic()" id="mainBtn" class="w-full bg-red-600 p-3 rounded font-bold">GET DOWNLOAD LINK</button>
+        
+        <div id="status" class="mt-4 text-sm text-gray-400 hidden">Processing...</div>
+        
         <div id="result" class="mt-4 hidden">
-            <a id="downloadLink" href="#" target="_blank" 
-                class="block text-center bg-green-600 p-4 rounded font-bold">
-                CLICK TO SAVE 720p
-            </a>
+            <a id="dlButton" href="#" target="_blank" class="block w-full bg-green-600 p-3 rounded text-center font-bold">DOWNLOAD 720p NOW</a>
         </div>
     </div>
 
     <script>
-        async function downloadVideo() {
-            // Test if script is running
-            console.log("Button clicked");
-            
-            const url = document.getElementById('videoUrl').value;
-            const statusBox = document.getElementById('statusBox');
-            const statusText = document.getElementById('statusText');
+        async function runMagic() {
+            const url = document.getElementById('urlInput').value;
+            const status = document.getElementById('status');
             const result = document.getElementById('result');
-            const btn = document.getElementById('btn');
+            const btn = document.getElementById('mainBtn');
 
-            if (!url) {
-                alert("Paste a link first!");
-                return;
-            }
+            if(!url) return alert("Paste a link first!");
 
-            // Show Status
-            statusBox.classList.remove('hidden');
+            // 1. Show Loading
+            status.classList.remove('hidden');
             result.classList.add('hidden');
-            statusText.innerText = "Connecting to server...";
             btn.disabled = true;
-            btn.opacity = "0.5";
+            status.innerText = "Connecting to server... (wait 10 seconds)";
 
             try {
-                // CHANGE 'yourusername' to your actual PythonAnywhere username below!
-                const myUser = "yourusername"; 
-                const apiPath = `https://${myUser}.pythonanywhere.com/download?url=${encodeURIComponent(url)}`;
+                // CHANGE 'notcosmichere' to your actual PythonAnywhere username below!
+                const user = "notcosmichere"; 
+                const api = `https://${user}.pythonanywhere.com/download?url=${encodeURIComponent(url)}`;
                 
-                statusText.innerText = "Server is processing... please wait 5-10 seconds.";
-                
-                const response = await fetch(apiPath);
+                const response = await fetch(api);
                 const data = await response.json();
 
-                if (data.success) {
-                    statusText.innerText = "Link Generated!";
-                    document.getElementById('downloadLink').href = data.download_url;
+                if(data.success) {
+                    status.innerText = "Found it!";
+                    document.getElementById('dlButton').href = data.download_url;
                     result.classList.remove('hidden');
                 } else {
-                    statusText.innerText = "Error: " + data.message;
+                    status.innerText = "Error: " + data.message;
                 }
-            } catch (err) {
-                statusText.innerText = "Connection Failed. Check PythonAnywhere Reload.";
-                console.error(err);
+            } catch (e) {
+                status.innerText = "Connection Failed! Make sure you RELOADED PythonAnywhere.";
+                console.log(e);
             } finally {
                 btn.disabled = false;
-                btn.opacity = "1";
             }
         }
     </script>
